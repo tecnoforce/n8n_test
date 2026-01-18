@@ -1,0 +1,128 @@
+{
+  "name": "Generar Anuncios",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "edit",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-pro-image-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-pro-image-preview (Nano Banana Pro)"
+        },
+        "prompt": "={{ $json.body.instructions }}",
+        "images": {
+          "values": [
+            {
+              "binaryPropertyName": "character_image"
+            },
+            {
+              "binaryPropertyName": "product_image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        32
+      ],
+      "id": "02b02070-091f-4923-ac85-75d91e8a65b1",
+      "name": "Edit an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "8n6l0eyUwgHnCdvg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.email }}",
+        "subject": "¡Aquí tienes tu anuncio!",
+        "message": "Aquí tienes el anuncio personalizado",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "edited"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        32
+      ],
+      "id": "4d8242bb-7e06-433b-9048-6aa268a1f046",
+      "name": "Send a message",
+      "webhookId": "01229567-d6bb-45b7-81df-c8f2e58eed38",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zMw2ZBmuHMVnlCra",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "924bab70-786f-4623-99e3-f1de2d2a8529",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        80,
+        32
+      ],
+      "id": "29086fc2-0615-4a63-921f-b9293bd1a241",
+      "name": "Webhook",
+      "webhookId": "924bab70-786f-4623-99e3-f1de2d2a8529"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit an image": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "6ea8b5bf-79f2-4c79-8b17-d3ce134ebea7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd45752616b99f4db905fdbf77b15f941dcae0df3c6a48b8fdb10fb443542c37"
+  },
+  "id": "kTnDr7RckXiwCorz",
+  "tags": []
+}

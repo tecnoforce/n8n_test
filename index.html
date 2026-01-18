@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLUNEXAI - Generador de Anuncios</title>
+    <style>
+        :root {
+            --bg-color: #050510;
+            --primary: #00f3ff;
+            --secondary: #ff00ff;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --font-stack: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-stack);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        /* Background Canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            display: inline-block;
+            cursor: default;
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        h1::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            width: 100%;
+            height: 100%;
+            color: var(--secondary);
+            opacity: 0.5;
+            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+            animation: glitch 2.5s infinite linear alternate-reverse;
+        }
+
+        h1::after {
+            content: attr(data-text);
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            width: 100%;
+            height: 100%;
+            color: var(--primary);
+            opacity: 0.5;
+            overflow: hidden;
+            clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+            animation: glitch 3s infinite linear alternate;
+        }
+
+        @keyframes glitch {
+            0% {
+                transform: translate(0);
+            }
+
+            20% {
+                transform: translate(-2px, 2px);
+            }
+
+            40% {
+                transform: translate(-2px, -2px);
+            }
+
+            60% {
+                transform: translate(2px, 2px);
+            }
+
+            80% {
+                transform: translate(2px, -2px);
+            }
+
+            100% {
+                transform: translate(0);
+            }
+        }
+
+        @keyframes pulse-glow {
+            from {
+                text-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+            }
+
+            to {
+                text-shadow: 0 0 20px rgba(0, 243, 255, 0.6), 0 0 10px rgba(255, 0, 255, 0.4);
+            }
+        }
+
+        /* Upload Section */
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .upload-section {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 243, 255, 0.1);
+            border-color: var(--primary);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-area {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .preview-area.dragover {
+            border-color: var(--secondary);
+            background: rgba(255, 0, 255, 0.05);
+        }
+
+        .preview-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .preview-area.has-image img {
+            display: block;
+        }
+
+        .preview-area .placeholder {
+            color: var(--text-muted);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn-select {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+
+        .btn-select:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        /* Form Section */
+        .form-section {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            color: var(--secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        input[type="email"],
+        textarea {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 1rem;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input[type="email"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.2);
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, filter 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            filter: grayscale(1);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Status & Toast */
+        .status-message {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 1.1rem;
+            min-height: 1.5em;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .status-message.visible {
+            opacity: 1;
+        }
+
+        .status-message.success {
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .status-message.error {
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+        }
+
+        .status-message.loading {
+            color: var(--primary);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="container">
+        <header>
+            <h1 data-text="BLUNEXAI">BLUNEXAI</h1>
+            <p style="color: var(--text-muted); margin-top: 0.5rem; letter-spacing: 2px;">GENERADOR DE ANUNCIOS IA</p>
+        </header>
+
+        <div class="upload-section">
+            <!-- Character Image -->
+            <div class="card">
+                <h2>Personaje</h2>
+                <div class="preview-area" id="drop-char" onclick="document.getElementById('file-char').click()">
+                    <div class="placeholder">
+                        <p>Arrastra o haz clic</p>
+                        <p style="font-size: 0.8rem; opacity: 0.7;">(Máx 10MB)</p>
+                    </div>
+                    <img id="preview-char" src="" alt="Previsualización Personaje">
+                </div>
+                <button class="btn-select" onclick="document.getElementById('file-char').click()">Seleccionar
+                    Archivo</button>
+                <input type="file" id="file-char" class="file-input" accept="image/png, image/jpeg, image/webp">
+            </div>
+
+            <!-- Product Image -->
+            <div class="card">
+                <h2>Producto</h2>
+                <div class="preview-area" id="drop-prod" onclick="document.getElementById('file-prod').click()">
+                    <div class="placeholder">
+                        <p>Arrastra o haz clic</p>
+                        <p style="font-size: 0.8rem; opacity: 0.7;">(Máx 10MB)</p>
+                    </div>
+                    <img id="preview-prod" src="" alt="Previsualización Producto">
+                </div>
+                <button class="btn-select" onclick="document.getElementById('file-prod').click()">Seleccionar
+                    Archivo</button>
+                <input type="file" id="file-prod" class="file-input" accept="image/png, image/jpeg, image/webp">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="instructions">Instrucciones / Prompt</label>
+                <textarea id="instructions" placeholder="Describe cómo quieres que sea tu anuncio..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email de Recepción *</label>
+                <input type="email" id="email" placeholder="usuario@ejemplo.com" required>
+            </div>
+
+            <button id="submit-btn" class="btn-submit">
+                <span>GENERAR ANUNCIO</span>
+            </button>
+            <div id="status-area" class="status-message"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Particle Background ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+                this.color = Math.random() > 0.5 ? '#00f3ff' : '#ff00ff';
+                this.alpha = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 50; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+
+        // --- App Logic ---
+        const WEBHOOK_URL = 'https://n8nclinica.proasures.es/webhook/publi_imagen';
+
+        const files = {
+            char: null,
+            prod: null
+        };
+
+        const els = {
+            charInput: document.getElementById('file-char'),
+            prodInput: document.getElementById('file-prod'),
+            charPreview: document.getElementById('preview-char'),
+            prodPreview: document.getElementById('preview-prod'),
+            charArea: document.getElementById('drop-char'),
+            prodArea: document.getElementById('drop-prod'),
+            instructions: document.getElementById('instructions'),
+            email: document.getElementById('email'),
+            submitBtn: document.getElementById('submit-btn'),
+            status: document.getElementById('status-area')
+        };
+
+        function handleFile(file, type) {
+            if (!file) return;
+            if (file.size > 10 * 1024 * 1024) {
+                showStatus('Error: La imagen supera los 10MB', 'error');
+                return;
+            }
+
+            files[type] = file;
+
+            const url = URL.createObjectURL(file);
+            const img = type === 'char' ? els.charPreview : els.prodPreview;
+            const area = type === 'char' ? els.charArea : els.prodArea;
+
+            // Limpiar URL anterior para evitar memory leak
+            if (img.src && img.src.startsWith('blob:')) {
+                URL.revokeObjectURL(img.src);
+            }
+
+            img.src = url;
+            area.classList.add('has-image');
+        }
+
+        // Event Listeners para Inputs
+        els.charInput.addEventListener('change', (e) => handleFile(e.target.files[0], 'char'));
+        els.prodInput.addEventListener('change', (e) => handleFile(e.target.files[0], 'prod'));
+
+        // Drag & Drop
+        ['char', 'prod'].forEach(type => {
+            const area = type === 'char' ? els.charArea : els.prodArea;
+
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+
+            area.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    handleFile(e.dataTransfer.files[0], type);
+                }
+            });
+        });
+
+        // Submit
+        els.submitBtn.addEventListener('click', async () => {
+            const email = els.email.value.trim();
+            const instructions = els.instructions.value.trim();
+
+            // Validaciones
+            if (!files.char || !files.prod) {
+                showStatus('Por favor, sube ambas imágenes (Personaje y Producto)', 'error');
+                return;
+            }
+            if (!email || !email.includes('@')) {
+                showStatus('Por favor, introduce un email válido', 'error');
+                return;
+            }
+
+            // Preparar envío
+            setLoading(true);
+            const formData = new FormData();
+            formData.append('character_image', files.char);
+            formData.append('product_image', files.prod);
+            formData.append('instructions', instructions);
+            formData.append('email', email);
+            formData.append('client_timestamp', new Date().toISOString());
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    showStatus(`¡Perfecto! Recibirás el anuncio en: ${email}`, 'success');
+                    els.submitBtn.innerHTML = '<span>¡ENVIADO!</span>';
+                    setTimeout(() => els.submitBtn.innerHTML = '<span>GENERAR ANUNCIO</span>', 3000);
+                } else {
+                    throw new Error('Error en el servidor');
+                }
+            } catch (error) {
+                console.error(error);
+                showStatus('Ocurrió un error al enviar. Por favor intenta de nuevo.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function showStatus(msg, type) {
+            els.status.textContent = msg;
+            els.status.className = `status-message visible ${type}`;
+        }
+
+        function setLoading(isLoading) {
+            els.submitBtn.disabled = isLoading;
+            if (isLoading) {
+                els.submitBtn.innerHTML = '<div class="spinner"></div> GENERANDO...';
+                showStatus('', '');
+            }
+        }
+
+    </script>
+</body>
+
+</html>

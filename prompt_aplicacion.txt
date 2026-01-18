@@ -1,0 +1,73 @@
+Genera un único archivo index.html autocontenido (todo en el mismo documento: <style> y <script> embebidos). Prohibido usar librerías o recursos externos: no CDN, no frameworks, no Google Fonts, no icon packs. Solo HTML, CSS y JavaScript vanilla.
+
+Contexto de uso
+Este HTML se servirá como interfaz web y al pulsar “Enviar” debe llamar por POST a este webhook de n8n:
+https://tu_url/webhook/924bab70-786f-1223-99e3-f1de2d2a8529
+
+Objetivo funcional
+La interfaz es una mini-app para crear anuncios personalizados con:
+
+Subida de 2 imágenes:
+Imagen 1: Personaje
+Imagen 2: Producto
+Al seleccionar cada archivo, debe previsualizarse inmediatamente en la pantalla (sin subirla todavía).
+Un campo textarea para “Instrucciones / Prompt” (texto libre).
+Un campo email obligatorio para “Email donde recibir el anuncio”.
+Botón Enviar.
+Tras pulsar Enviar:
+Validar que hay 2 imágenes + email válido.
+Enviar un POST al webhook.
+Mostrar en UI un estado tipo:
+“Perfecto. Recibirás el anuncio en: usuario@dominio.com”
+Manejar errores con mensaje claro (sin mostrar stack traces).
+Requisitos técnicos del POST
+Usar fetch() con FormData (multipart/form-data).
+Adjuntar claves EXACTAS (usa estos nombres de campo):
+character_image (File)
+product_image (File)
+instructions (string)
+email (string)
+Incluir también un campo opcional client_timestamp (ISO string).
+Mientras se envía:
+Deshabilitar botón.
+Mostrar un spinner o indicador de carga elegante.
+Al finalizar (éxito):
+Mantener el mensaje de “lo recibirás por email”.
+Rehabilitar botón (o cambiar a “Enviado” por unos segundos).
+Al fallar:
+Rehabilitar botón.
+Mostrar mensaje de error en un banner/alert bonito.
+Diseño / UI “espectacular”
+Quiero una interfaz muy visual, moderna, “cyber / futurista”, con animaciones potentes pero fluidas:
+
+Fondo con gradientes animados + “glow” suave + algún efecto dinámico (por ejemplo partículas con <canvas> dibujadas en JS, sin librerías).
+Cabecera con el título BLUNEXAI al inicio:
+Debe ser dinámico (animación) con efectos “brutales” tipo neón, glitch, shimmer, 3D tilt al mover el mouse.
+Debe sentirse “vivo”: leves deformaciones, parallax o tracking.
+Layout:
+Encabezado arriba.
+Debajo, un panel con 2 tarjetas de subida (Personaje/Producto) con “dropzone” (drag & drop opcional) + botón de seleccionar archivo.
+Previsualizaciones grandes, con borde y sombra glow.
+Abajo: textarea de instrucciones + input email + botón enviar.
+Responsivo:
+En móvil: todo en una columna.
+En desktop: dos columnas para las imágenes, y el formulario abajo.
+Accesibilidad:
+Labels correctos, focus visible, navegación por teclado.
+Contraste suficiente.
+Detalles UX que debes implementar
+Validación en tiempo real:
+Email con patrón básico.
+Aviso si falta alguna imagen.
+Limitar tamaño de archivo (por ejemplo 10MB por imagen) y avisar si excede.
+Previsualización:
+Usar URL.createObjectURL() y revocar URLs viejas (URL.revokeObjectURL) para evitar fugas.
+Drag & Drop:
+Si lo implementas: resaltar dropzone al arrastrar archivos encima.
+Estado:
+Área fija de “status” debajo del botón para mensajes (éxito/cargando/error).
+Limpieza:
+Código bien organizado, funciones pequeñas, comentarios breves.
+Nada de dependencias externas.
+Entregable
+Devuélveme SOLO el contenido del archivo HTML completo (con doctype, head, meta viewport, style, body, script). Sin explicaciones antes o después.
