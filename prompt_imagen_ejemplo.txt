@@ -1,0 +1,31 @@
+OBJETIVO: Generar una imagen publicitaria premium estilo anuncio de perfume de lujo usando dos imágenes de referencia:
+
+Imagen A (personaje/modelo): conservar identidad, rasgos faciales y tono de piel.
+
+Imagen B (producto/perfume): conservar diseño exacto del frasco, etiqueta, colores, tapón y proporciones.
+
+DESCRIPCIÓN DE LA ESCENA:
+Fotografía publicitaria de perfume de alta gama. El personaje de la Imagen A aparece como protagonista, vestido/a con elegancia extrema (smoking negro impecable o vestido de noche satinado, joyería sutil), postura segura y sofisticada, expresión intensa y seductora, mirada a cámara. Iluminación cinematográfica tipo estudio (key light suave, rim light para recorte), piel con acabado natural premium, alto rango dinámico.
+
+El perfume de la Imagen B aparece en primer plano (hero shot) o sostenido con naturalidad, pero siempre como foco de marca: frasco nítido, cristal con reflejos realistas, microdetalles visibles (tipografía, bordes, textura del tapón). Sin deformar el producto.
+
+FONDO / AMBIENTE:
+Fondo glamuroso y nocturno: hotel de lujo / penthouse / backstage de gala, con bokeh de luces cálidas, reflejos dorados, cortinas de terciopelo, mármol o acero pulido. Sensación de exclusividad, misterio, sensualidad. Paleta: negros profundos, dorados, ámbar, destellos suaves. Ligera niebla o humo fino (muy sutil) para dramatismo.
+
+COMPOSICIÓN:
+Formato vertical tipo campaña (4:5 o 9:16). Composición editorial: personaje a un lado (tercio), producto destacado en el tercio inferior o centro según encaje. Profundidad de campo: producto y rostro en foco, fondo desenfocado. Estética “high fashion fragrance ad”.
+
+CALIDAD:
+Ultra-realista, fotografía comercial, 8K, detalle alto, contraste elegante, sin ruido, sin artefactos.
+
+RESTRICCIONES IMPORTANTES:
+
+Mantener identidad del personaje (Imagen A) y diseño exacto del perfume (Imagen B).
+
+No cambiar el texto/branding del frasco (si existe).
+
+No manos deformes, no dedos extra, no cara cambiada, no ojos raros.
+
+No cartoon, no ilustración, no CGI evidente.
+
+Sin marcas de agua, sin texto sobreimpreso, sin logos inventados.
