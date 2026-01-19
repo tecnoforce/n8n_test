@@ -485,6 +485,10 @@
                 style="text-decoration: none; display: inline-block; text-align: center; margin-top: 1rem; font-size: 1rem;">
                 Descargar Imagen
             </a>
+            <button id="regenerate-btn" class="btn-submit"
+                style="margin-top: 0.5rem; background: linear-gradient(45deg, var(--secondary), var(--primary));">
+                REGENERAR (Mismos Datos)
+            </button>
         </div>
     </div>
 
@@ -564,7 +568,8 @@
             status: document.getElementById('status-area'),
             resultSection: document.getElementById('result-section'),
             resultImg: document.getElementById('result-img'),
-            downloadBtn: document.getElementById('download-btn')
+            downloadBtn: document.getElementById('download-btn'),
+            regenerateBtn: document.getElementById('regenerate-btn')
         };
 
         function handleFile(file, type) {
@@ -616,8 +621,8 @@
             });
         });
 
-        // Submit
-        els.submitBtn.addEventListener('click', async () => {
+        // Submit & Regenerate
+        async function submitForm() {
             const email = els.email.value.trim();
             const instructions = els.instructions.value.trim();
 
@@ -633,6 +638,10 @@
 
             // Preparar envío
             setLoading(true);
+
+            // Ocultar resultado anterior si existe al regenerar
+            els.resultSection.classList.remove('visible');
+
             const formData = new FormData();
             formData.append('character_image', files.char);
             formData.append('product_image', files.prod);
@@ -649,6 +658,7 @@
                 if (response.ok) {
                     showStatus(`¡Perfecto! Recibirás el anuncio en: ${email}`, 'success');
                     els.submitBtn.innerHTML = '<span>¡ENVIADO!</span>';
+                    els.regenerateBtn.disabled = false; // Asegurar que se habilita
 
                     // Intentar obtener la imagen de la respuesta
                     try {
@@ -682,6 +692,7 @@
                     } catch (e) {
                         console.warn("No se pudo procesar la imagen de la respuesta:", e);
                     }
+
                     setTimeout(() => els.submitBtn.innerHTML = '<span>GENERAR ANUNCIO</span>', 3000);
                 } else {
                     throw new Error('Error en el servidor');
@@ -692,7 +703,10 @@
             } finally {
                 setLoading(false);
             }
-        });
+        }
+
+        els.submitBtn.addEventListener('click', submitForm);
+        els.regenerateBtn.addEventListener('click', submitForm);
 
         function showStatus(msg, type) {
             els.status.textContent = msg;
@@ -701,9 +715,14 @@
 
         function setLoading(isLoading) {
             els.submitBtn.disabled = isLoading;
+            els.regenerateBtn.disabled = isLoading;
+
             if (isLoading) {
                 els.submitBtn.innerHTML = '<div class="spinner"></div> GENERANDO...';
+                els.regenerateBtn.innerHTML = '<div class="spinner"></div> REGENERANDO...';
                 showStatus('', '');
+            } else {
+                els.regenerateBtn.innerHTML = 'REGENERAR (Mismos Datos)';
             }
         }
 
