@@ -25,13 +25,13 @@ ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
-# Copy necessary files from builder
-COPY --from=builder /app/public ./public
+# Copy standalone output
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 # Expose port
 EXPOSE 3000
 
 # Start the application
-CMD ["sh", "-c", "HOSTNAME=0.0.0.0 node server.js"]
+CMD ["node", "server.js"]
